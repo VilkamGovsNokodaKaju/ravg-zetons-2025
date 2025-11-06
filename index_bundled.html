@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>zetonszetonszetons</title>
+  <style>
+    :root{ --bg:#0f1220;--card:#171a2b;--muted:#aab1c7;--text:#eef2ff;--accent:#9b87f5;--chip:#232744;--border:#252a48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0d1020 0%,#0b1022 100%);color:var(--text)}
+    header{position:sticky;top:0;z-index:5;background:rgba(13,16,32,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    h1{font-weight:800;letter-spacing:.2px;margin:6px 0 2px}
+    .sub{color:var(--muted);font-size:.95rem;margin-bottom:16px}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 14px 10px;box-shadow:0 1px 0 rgba(255,255,255,.04),0 12px 30px rgba(0,0,0,.25)}
+    .search{display:flex;gap:8px}
+    input[type="search"]{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0c1023;color:var(--text);font-size:1rem;outline:none}
+    button{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(180deg,#23284d,#1d2143);color:#fff;font-weight:600;cursor:pointer}
+    .pill{display:inline-flex;gap:8px;align-items:center;background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:.85rem;color:var(--muted)}
+    .perf{border-radius:16px;overflow:hidden}
+    .perf-header{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;padding:12px 10px;border-radius:12px}
+    .perf-header:hover{background:#1a1e35}
+    .perf-title{display:flex;gap:10px;align-items:center}
+    .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#141936;border:1px solid var(--border);font-weight:700;color:var(--accent)}
+    .name{font-weight:700}
+    .meta{color:var(--muted);font-size:.9rem}
+    .chev{transition:transform .2s ease}
+    .open .chev{transform:rotate(90deg)}
+    .perf-body{display:none;padding:12px;border-top:1px dashed var(--border)}
+    .open + .perf-body{display:block}
+    .section{margin:8px 0 4px}
+    .section h4{margin:10px 0 6px;font-size:0.95rem;color:#dfe3ff;letter-spacing:.2px}
+    .roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .role-card{background:#121632;border:1px solid var(--border);border-radius:12px;padding:10px}
+    .role-card h5{margin:0 0 8px;font-size:.88rem;color:#c9d1ff;letter-spacing:.3px}
+    .names{display:flex;flex-wrap:wrap;gap:8px}
+    .names .pill{background:#0f1331}
+    .desc{white-space:pre-wrap;color:#d3d8ff}
+    .contacts{display:flex;flex-wrap:wrap;gap:6px}
+    .muted{color:var(--muted)}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,#28305a,transparent);margin:10px 0}
+    .actor-result{margin-top:10px}
+    .actor-card{background:#121632;border:1px solid var(--border);border-radius:16px;padding:12px}
+    a.btn-link{color:#bcd2ff;text-decoration:none;border-bottom:1px dashed #3e4a86}
+    .spinner{width:18px;height:18px;border-radius:50%;border:3px solid #28305a;border-top-color:var(--accent);animation:spin .8s linear infinite;display:inline-block;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{color:var(--muted);font-size:.85rem;padding:24px 0 40px;text-align:center}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>RĀVĢ Žetonvakars 2025 lomu sadalījums</h1>
+      <div class="row">
+        <div class="card" style="flex:1;min-width:300px">
+          <form id="searchForm" class="search" autocomplete="off">
+            <label class="sr-only" for="actorSearch">Meklēt pēc vārda...</label>
+            <input id="actorSearch" name="actor" type="search" placeholder="Meklēt pēc vārda..." list="actorList" />
+            <datalist id="actorList"></datalist>
+            <button id="searchBtn" type="submit">Meklēt</button>
+          </form>
+          <div id="actorResult" class="actor-result"></div>
+        </div>
+        <div class="card" style="min-width:260px">
+          <div class="muted">Data source</div>
+          <div id="fileInfo" class="row" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="status" class="muted"><span class="spinner"></span> Loading…</div>
+    <div id="perfList" class="grid" aria-live="polite"></div>
+  </main>
+
+  <footer>
+  </footer>
+
+  <!-- The bundler injects the CSVs here as JSON so the page works offline with file:// -->
+  <script id="EMBEDDED_DATA" type="application/json">{}</script>
+
+<script>
+// === State ===
+let actorToAssignments = new Map();
+let perfMetaByName = new Map();
+let rolesByPerformance = new Map();
+
+// === Utils ===
+const slug = s => String(s||'').toLowerCase()
+  .normalize('NFD').replace(/\p{Diacritic}/gu,'')
+  .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+function ensure(map, key, init){ if(!map.has(key)) map.set(key, typeof init==='function'?init():init); return map.get(key); }
+function createEl(tag, opts={}){ const el=document.createElement(tag); if(opts.class) el.className=opts.class; if(opts.text!=null) el.textContent=opts.text; if(opts.html!=null) el.innerHTML=opts.html; if(opts.attrs){ for(const [k,v] of Object.entries(opts.attrs)) el.setAttribute(k,v)} return el; }
+function sortedRolesMap(roleMap){ const entries=Array.from(roleMap.entries()).map(([role,set])=>[role,Array.from(set).sort((a,b)=>a.localeCompare(b,'lv'))]); entries.sort((a,b)=>a[0].localeCompare(b[0],'lv')); return entries; }
+
+// --- CSV parsing (auto-detect semicolon vs comma) ---
+function parseCSV(text){
+  const firstLine = (text.split(/\r?\n/)[0]||'');
+  const delim = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+  const rows=[]; let cur=[], field='', inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i], next=text[i+1];
+    if(inQuotes){
+      if(ch==='"'){
+        if(next==='"'){ field+='"'; i++; } else { inQuotes=false; }
+      } else { field+=ch; }
+    } else {
+      if(ch==='"') inQuotes=true; else if(ch===delim){ cur.push(field); field=''; }
+      else if(ch==='\n'){ cur.push(field); rows.push(cur); cur=[]; field=''; }
+      else if(ch==='\r'){ } else { field+=ch; }
+    }
+  }
+  cur.push(field); rows.push(cur); return rows;
+}
+
+// === Rendering ===
+function renderFileInfo(){
+  const box = document.getElementById('fileInfo');
+  box.replaceChildren();
+  const embed = document.getElementById('EMBEDDED_DATA').textContent.trim();
+  if(embed && embed!=='{}'){
+    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Mode:</strong> Embedded</span>`);
+  } else if(location.protocol.startsWith('http')){
+    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Files:</strong> GRAFIKS.csv, DALIBNIEKI.csv</span>`);
+  } else {
+    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Mode:</strong> Local file (drag CSVs)</span>`);
+  }
+  box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Sheets</strong>: GRAFIKS / DALIBNIEKI</span>`);
+}
+
+function renderActorList(){
+  const list = document.getElementById('actorList');
+  list.replaceChildren();
+  const names = Array.from(actorToAssignments.keys()).sort((a,b)=>a.localeCompare(b,'lv'));
+  for(const n of names){ const opt=document.createElement('option'); opt.value=n; list.appendChild(opt); }
+}
+
+function renderPerformances(){
+  const target = document.getElementById('perfList'); target.replaceChildren();
+  const perfs = Array.from(perfMetaByName.values()).sort((a,b)=>{ const ao=Number(a.order)||999999, bo=Number(b.order)||999999; return ao-bo || a.name.localeCompare(b.name,'lv'); });
+  for(const meta of perfs){
+    const perfKey = meta.name; const perfId = 'perf-'+slug(perfKey);
+    const wrap = createEl('div',{class:'perf card'});
+    const header = createEl('div',{class:'perf-header', attrs:{role:'button','aria-expanded':'false','aria-controls':perfId, tabindex:0}});
+    const body = createEl('div',{class:'perf-body', attrs:{id:perfId}});
+    header.addEventListener('click',()=>togglePerf(header, body));
+    header.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); togglePerf(header, body);} });
+    const title = createEl('div',{class:'perf-title'});
+    title.append(createEl('div',{class:'num', text:String(meta.order??'')}), createEl('div',{html:`<div class="name">${meta.name||'Unnamed performance'}</div><div class="meta">Spied, lai redzētu detaļas</div>`}));
+    const chev = createEl('div',{class:'chev', html:'▶'}); header.append(title,chev);
+    const desc = createEl('div',{class:'section'}); desc.append(createEl('h4',{text:'Apraksts'}), createEl('div',{class:'desc', text: meta.desc || '—'}));
+    const contacts = createEl('div',{class:'section'}); contacts.append(createEl('h4',{text:'Atbildīgās personas'}));
+    const people = String(meta.contacts||'').split(/[\,\n;]/).map(s=>s.trim()).filter(Boolean);
+    const contWrap = createEl('div',{class:'contacts'}); if(people.length===0) contWrap.append(createEl('span',{class:'muted',text:'—'})); for(const p of people){ contWrap.append(createEl('span',{class:'pill',text:p})); } contacts.append(contWrap);
+    const roleSec = createEl('div',{class:'section'}); roleSec.append(createEl('h4',{text:'Dalībnieki'}));
+    const roleWrap = createEl('div',{class:'roles'}); const roleMap = rolesByPerformance.get(perfKey) || new Map();
+    if(roleMap.size===0){ roleWrap.append(createEl('div',{class:'muted',text:'No assignments in DALIBNIEKI for this performance.'})); }
+    else { for(const [role,names] of sortedRolesMap(roleMap)){ const rc=createEl('div',{class:'role-card'}); rc.append(createEl('h5',{text:role.toUpperCase()})); const nwrap=createEl('div',{class:'names'}); for(const n of names){ nwrap.append(createEl('span',{class:'pill',text:n})); } rc.append(nwrap); roleWrap.append(rc);} }
+    roleSec.append(roleWrap);
+    body.append(desc, createEl('div',{class:'divider'}), contacts, createEl('div',{class:'divider'}), roleSec);
+    wrap.append(header, body); target.appendChild(wrap);
+  }
+}
+
+function togglePerf(header, body){
+  const isOpen = header.classList.toggle('open'); header.setAttribute('aria-expanded', String(isOpen));
+  if(isOpen){ document.querySelectorAll('.perf-header.open').forEach(h=>{ if(h!==header){ h.classList.remove('open'); h.setAttribute('aria-expanded','false'); }}); document.querySelectorAll('.perf-body').forEach(b=>{ if(b!==body) b.style.display='none'; }); }
+  body.style.display = isOpen? 'block':'none';
+}
+
+function renderActorResult(name){
+  const box=document.getElementById('actorResult'); box.replaceChildren(); const card=createEl('div',{class:'actor-card'});
+  card.append(createEl('div',{html:`<strong>${name}</strong>`}));
+  const list = actorToAssignments.get(name)||[];
+  if(list.length===0){ card.append(createEl('div',{class:'muted',text:'No assignments found.'})); }
+  else { const ul=createEl('ul'); list.sort((a,b)=>{ const A=perfMetaByName.get(a.performance)?.order??999999; const B=perfMetaByName.get(b.performance)?.order??999999; return A-B || a.performance.localeCompare(b.performance,'lv') || a.role.localeCompare(b.role,'lv'); });
+    for(const it of list){ const li=createEl('li'); const pmeta=perfMetaByName.get(it.performance)||{name:it.performance,order:''}; const link=createEl('a',{class:'btn-link',attrs:{href:'#'},html:`#${pmeta.order} – <strong>${pmeta.name}</strong> <span class='muted'>(${it.role})</span>`}); link.addEventListener('click',e=>{e.preventDefault(); focusPerformance(it.performance);}); li.append(link); ul.append(li);} card.append(ul); }
+  box.append(card);
+}
+
+function focusPerformance(perfName){ const id='perf-'+slug(perfName); const body=document.getElementById(id); if(!body) return; const header=body.previousElementSibling; if(header&&!header.classList.contains('open')) togglePerf(header, body); body.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+// === Data flow ===
+function processCsvTexts(gTxt, dTxt){
+  const gRows = parseCSV(gTxt); const dRows = parseCSV(dTxt);
+  actorToAssignments = new Map(); perfMetaByName = new Map(); rolesByPerformance = new Map();
+  for(let i=1;i<gRows.length;i++){ const r=gRows[i]; if(!r) continue; const order=r[0]; const name=(r[1]||'').trim(); if(!name) continue; const desc=r[2]||''; const contacts=r[3]||''; perfMetaByName.set(name,{order,name,desc,contacts}); }
+  for(let i=1;i<dRows.length;i++){ const r=dRows[i]; if(!r) continue; const actor=(r[0]||'').trim(); if(!actor) continue; for(let c=1;c<r.length;c+=2){ const perf=(r[c]||'').trim(); const role=(r[c+1]||'').trim(); if(!perf||!role) continue; ensure(actorToAssignments,actor,()=>[]).push({performance:perf, role}); const roleMap=ensure(rolesByPerformance,perf,()=>new Map()); const set=ensure(roleMap,role,()=>new Set()); set.add(actor); if(!perfMetaByName.has(perf)) perfMetaByName.set(perf,{order:'',name:perf,desc:'',contacts:''}); } }
+  renderFileInfo(); renderActorList(); renderPerformances();
+  document.getElementById('status').textContent = `Loaded ${perfMetaByName.size} performances and ${actorToAssignments.size} actors.`;
+}
+
+async function loadData(){
+  const status = document.getElementById('status');
+  try{
+    // 1) Embedded data wins (works offline, file://, email, etc.)
+    const embedRaw = document.getElementById('EMBEDDED_DATA').textContent.trim();
+    if(embedRaw && embedRaw !== '{}' ){
+      const payload = JSON.parse(embedRaw);
+      if(payload.mode === 'csv-embedded'){
+        processCsvTexts(payload.grafiksCsv, payload.dalibniekiCsv);
+        return;
+      }
+    }
+
+    // 2) Served over http(s): fetch CSVs from same folder
+    if(location.protocol.startsWith('http')){
+      const [gRes, dRes] = await Promise.all([
+        fetch('GRAFIKS.csv', {cache:'no-cache'}),
+        fetch('DALIBNIEKI.csv', {cache:'no-cache'})
+      ]);
+      if(!gRes.ok) throw new Error(`Failed to fetch GRAFIKS.csv: ${gRes.status}`);
+      if(!dRes.ok) throw new Error(`Failed to fetch DALIBNIEKI.csv: ${dRes.status}`);
+      const [gTxt, dTxt] = await Promise.all([gRes.text(), dRes.text()]);
+      processCsvTexts(gTxt, dTxt); return;
+    }
+
+    // 3) file:// fallback (no server, no embedded data): prompt for drag & drop
+    status.innerHTML = 'Local file mode detected. Drag & drop your CSV files (GRAFIKS.csv and DALIBNIEKI.csv) anywhere on this page, or press Ctrl+O to choose files.';
+    enableLocalPickers();
+  }catch(err){
+    console.error(err); status.innerHTML = `❌ Failed to load data.<br><code>${String(err)}</code>`;
+  }
+}
+
+// Local-only helpers
+function enableLocalPickers(){
+  const body=document.body; ['dragenter','dragover'].forEach(e=>body.addEventListener(e,ev=>{ev.preventDefault(); ev.dataTransfer.dropEffect='copy';}));
+  body.addEventListener('drop', async ev=>{ev.preventDefault(); const files=Array.from(ev.dataTransfer.files||[]); const g=files.find(f=>/grafiks/i.test(f.name)); const d=files.find(f=>/dalibnieki/i.test(f.name)); if(!g||!d){ document.getElementById('status').innerHTML='Please drop both <strong>GRAFIKS.csv</strong> and <strong>DALIBNIEKI.csv</strong>.'; return;} const [gTxt,dTxt]=await Promise.all([g.text(), d.text()]); processCsvTexts(gTxt, dTxt); });
+  window.addEventListener('keydown',(e)=>{ if(e.ctrlKey && e.key.toLowerCase()==='o'){ e.preventDefault(); const inp=document.createElement('input'); inp.type='file'; inp.multiple=true; inp.accept='.csv'; inp.addEventListener('change', async ()=>{ const files=Array.from(inp.files||[]); const g=files.find(f=>/grafiks/i.test(f.name)); const d=files.find(f=>/dalibnieki/i.test(f.name)); if(!g||!d){ document.getElementById('status').innerHTML='Please choose both <strong>GRAFIKS.csv</strong> and <strong>DALIBNIEKI.csv</strong>.'; return;} const [gTxt,dTxt]=await Promise.all([g.text(), d.text()]); processCsvTexts(gTxt, dTxt); }); inp.click(); } });
+}
+
+// Events
+window.addEventListener('DOMContentLoaded', ()=>{
+  loadData();
+  document.getElementById('searchForm').addEventListener('submit',(e)=>{ e.preventDefault(); const name=document.getElementById('actorSearch').value.trim(); if(!name) return; renderActorResult(name); });
+});
+</script>
+</body>
+</html>
