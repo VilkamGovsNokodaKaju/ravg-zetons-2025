@@ -64,8 +64,6 @@
           </form>
           <div id="actorResult" class="actor-result"></div>
         </div>
-          <div class="muted">Data source</div>
-          <div id="fileInfo" class="row" style="margin-top:6px"></div>
       </div>
     </div>
   </header>
@@ -118,16 +116,7 @@ function parseCSV(text){
 // === Rendering ===
 function renderFileInfo(){
   const box = document.getElementById('fileInfo');
-  box.replaceChildren();
-  const embed = document.getElementById('EMBEDDED_DATA').textContent.trim();
-  if(embed && embed!=='{}'){
-    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Mode:</strong> Embedded</span>`);
-  } else if(location.protocol.startsWith('http')){
-    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Files:</strong> GRAFIKS.csv, DALIBNIEKI.csv</span>`);
-  } else {
-    box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Mode:</strong> Local file (drag CSVs)</span>`);
-  }
-  box.insertAdjacentHTML('beforeend', `<span class="pill"><strong>Sheets</strong>: GRAFIKS / DALIBNIEKI</span>`);
+  if (!box) return; // safely do nothing
 }
 
 function renderActorList(){
